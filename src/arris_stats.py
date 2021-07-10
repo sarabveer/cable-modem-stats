@@ -130,12 +130,10 @@ def get_config(config_path=None):
         'sleep_before_exit': True,
 
         # Influx
-        'influx_host': 'localhost',
-        'influx_port': 8086,
-        'influx_database': 'cable_modem_stats',
-        'influx_username': None,
-        'influx_password': None,
-        'influx_use_ssl': False,
+        'influx_url': 'http://localhost:8086',
+        'influx_bucket': 'cable_modem_stats',
+        'influx_org': None,
+        'influx_token': None,
         'influx_verify_ssl': True,
     }
 
@@ -339,27 +337,24 @@ def parse_html_sb8200(html):
 
 def send_to_influx(stats, config):
     """ Send the stats to InfluxDB """
-    logging.info('Sending stats to InfluxDB (%s:%s)', config['influx_host'], config['influx_port'])
+    logging.info('Sending stats to InfluxDB (%s)', config['influx_url'])
 
-    from influxdb import InfluxDBClient
-    from influxdb.exceptions import InfluxDBClientError, InfluxDBServerError
+    from influxdb_client import InfluxDBClient, Point
+    from influxdb_client.client.write_api import SYNCHRONOUS
 
     influx_client = InfluxDBClient(
-        config['influx_host'],
-        config['influx_port'],
-        config['influx_username'],
-        config['influx_password'],
-        config['influx_database'],
-        config['influx_use_ssl'],
-        config['influx_verify_ssl'],
+        url = config['influx_url'],
+        token = config['influx_token'],
+        org = config['influx_org'],
+        verify_ssl = config['influx_verify_ssl']
     )
+    write_api = influx_client.write_api(write_options = SYNCHRONOUS)
 
     series = []
     current_time = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
 
     for stats_down in stats['downstream']:
-
-        series.append({
+        series.append(Point.from_dict({
             'measurement': 'downstream_statistics',
             'time': current_time,
             'fields': {
@@ -373,10 +368,10 @@ def send_to_influx(stats, config):
                 'channel_id': int(stats_down['channel_id']),
                 'modulation': stats_down['modulation']
             }
-        })
+        }))
 
     for stats_up in stats['upstream']:
-        series.append({
+        series.append(Point.from_dict({
             'measurement': 'upstream_statistics',
             'time': current_time,
             'fields': {
@@ -387,22 +382,14 @@ def send_to_influx(stats, config):
                 'channel_id': int(stats_up['channel_id']),
                 'channel_type': stats_up['channel_type']
             }
-        })
+        }))
 
-    try:
-        influx_client.write_points(series)
-    except (InfluxDBClientError, ConnectionError, InfluxDBServerError, ConnectionRefusedError) as exception:
-
-        # If DB doesn't exist, try to create it
-        if hasattr(exception, 'code') and exception.code == 404:
-            logging.warning('Database %s Does Not Exist.  Attempting to create database',
-                            config['influx_database'])
-            influx_client.create_database(config['influx_database'])
-            influx_client.write_points(series)
-        else:
-            logging.error(exception)
-            logging.error('Failed To Write To InfluxDB')
-            return
+    try:   
+        write_api.write(bucket = config['influx_bucket'], record = series)
+    except Exception:
+        logging.error(Exception)
+        logging.error('Failed To Write To InfluxDB')
+        return
 
     logging.info('Successfully wrote data to InfluxDB')
     logging.debug('Influx series sent to db:')
