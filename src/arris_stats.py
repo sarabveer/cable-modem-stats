@@ -287,6 +287,7 @@ def parse_html_sb8200(html):
         if not channel_id.isdigit():
             continue
 
+        modulation = table_row.find_all('td')[2].text.replace("Other", "OFDM PLC").strip()
         frequency = table_row.find_all('td')[3].text.replace(" Hz", "").strip()
         power = table_row.find_all('td')[4].text.replace(" dBmV", "").strip()
         snr = table_row.find_all('td')[5].text.replace(" dB", "").strip()
@@ -295,6 +296,7 @@ def parse_html_sb8200(html):
 
         stats['downstream'].append({
             'channel_id': channel_id,
+            'modulation': modulation,
             'frequency': frequency,
             'power': power,
             'snr': snr,
@@ -317,11 +319,13 @@ def parse_html_sb8200(html):
             continue
 
         channel_id = table_row.find_all('td')[1].text.strip()
+        channel_type = table_row.find_all('td')[3].text.replace(" Upstream", "").replace("OFDM", "OFDMA").strip()
         frequency = table_row.find_all('td')[4].text.replace(" Hz", "").strip()
         power = table_row.find_all('td')[6].text.replace(" dBmV", "").strip()
 
         stats['upstream'].append({
             'channel_id': channel_id,
+            'channel_type': channel_type,
             'frequency': frequency,
             'power': power,
         })
@@ -366,7 +370,8 @@ def send_to_influx(stats, config):
                 'uncorrectables': int(stats_down['uncorrectables'])
             },
             'tags': {
-                'channel_id': int(stats_down['channel_id'])
+                'channel_id': int(stats_down['channel_id']),
+                'modulation': stats_down['modulation']
             }
         })
 
@@ -379,7 +384,8 @@ def send_to_influx(stats, config):
                 'power': float(stats_up['power']),
             },
             'tags': {
-                'channel_id': int(stats_up['channel_id'])
+                'channel_id': int(stats_up['channel_id']),
+                'channel_type': stats_up['channel_type']
             }
         })
 
