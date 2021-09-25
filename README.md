@@ -9,9 +9,17 @@ Credit goes to:
 
 ## Authentication
 
-In late Oct 2020, Comcast deployed firmware updates to the SB8200 which now require authenticating against the modem. If your modem requires authentication (you get a login page when browsing to https://192.168.100.1/), then you must edit your config.ini file (or set the matching ENV variables) and set ```modem_auth_required``` to ```True```, and set ```modem_password``` appropriately. By default, your modem's password is the last eight characters of the serial number, located on a sticker on the bottom of the modem.
+### Oct. 2020
+
+In late Oct 2020, Comcast deployed firmware updates to the SB8200 which now require authenticating against the modem. If your modem requires authentication (you get a login page when browsing to https://192.168.100.1/), then you must edit your config.ini file (or set the matching ENV variables) and set `modem_auth_required` to `True`, and set `modem_password` appropriately. By default, your modem's password is the last eight characters of the serial number, located on a sticker on the bottom of the modem.
 
 There is some kind of bug (at least with Comcast's firmware) where the modem cannot handle more than ~10 sessions. Once those sessions have been used up, it seems you must wait for them to expire or reboot the modem. I have not been able to successfully log out of the sessions, but this script attempts to keep reusing the same session as long as it can.
+
+### Sept. 2021
+
+In Sept 2021, Comcast deployed another firmware which changed the login flow. If you have firmware version `AB01.02.053.05_051921_193.0A.NSH` or higher, please set `modem_new_auth` to `True`.
+
+This version seems to fix the ~10 session limit from the Oct. 2020 fimware. The `sleep_interval` has been reduced from `300` to `120`.
 
 ## Run in Docker
 Run in a Docker container with:
@@ -56,10 +64,11 @@ Config settings can be provided by the config.ini file, or set as ENV variables.
 | ------------ | ------------ | ------------ |
 | `arris_stats_debug` | `False` | enables debug logs |
 | `destination` | influxdb | influxdb is the only valid option at this time |
-| `sleep_interval` | 300 | |
+| `sleep_interval` | 120 | |
 | `modem_url` | https://192.168.100.1/cmconnectionstatus.html | |
 | `modem_verify_ssl` | `False` | |
 | `modem_auth_required` | `False` | |
+| `modem_new_auth` | `False` | |
 | `modem_username` | admin | |
 | `modem_password` | `None` | |
 | `modem_model` | sb8200 | only sb8200 is supported at this time |

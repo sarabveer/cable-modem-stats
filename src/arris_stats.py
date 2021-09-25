@@ -17,17 +17,6 @@ from datetime import datetime
 import urllib3
 import requests
 
-HEADERS = {
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'Accept-Language': 'en-US,en;q=0.5',
-    'Cache-Control': 'max-age=',
-    'Connection': 'keep-alive',
-    'DNT': '1',
-    'Upgrade-Insecure-Requests': '1',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:82.0) Gecko/20100101 Firefox/82.0',
-}
-
-
 def main():
     """ MAIN """
 
@@ -121,6 +110,7 @@ def get_config(config_path=None):
         'modem_url': 'https://192.168.100.1/cmconnectionstatus.html',
         'modem_verify_ssl': False,
         'modem_auth_required': False,
+        'modem_new_auth': False,
         'modem_username': 'admin',
         'modem_password': None,
         'modem_model': 'sb8200',
@@ -192,14 +182,26 @@ def get_credential(config):
     # encoded as a url param.  Look at the Javascript from the
     # login page for more info on the following.
     token = username + ":" + password
-    auth_hash = base64.b64encode(token.encode('ascii'))
-    auth_url = url + '?' + auth_hash.decode()
+    auth_hash = base64.b64encode(token.encode('ascii')).decode()
+
+    if config['modem_new_auth']:
+        auth_url = url + '?login_' + auth_hash
+    else:
+        auth_url = url + '?' + auth_hash
+
+    logging.debug('auth_hash: %s', auth_hash)
     logging.debug('auth_url: %s', auth_url)
 
     # This is going to respond with our "credential", which is a hash that we
     # have to send as a cookie with subsequent requests
     try:
-        resp = requests.get(auth_url, headers=HEADERS, auth=(username, password), verify=verify_ssl)
+        if config['modem_new_auth']:
+            resp = requests.get(auth_url, headers={'Authorization': 'Basic ' + auth_hash}, verify=verify_ssl)
+            cookie = resp.cookies['sessionId']
+            logging.debug('cookie: %s', cookie)
+        else:
+            resp = requests.get(auth_url, auth=(username, password), verify=verify_ssl)
+            cookie = None
 
         if resp.status_code != 200:
             logging.error('Error authenticating with %s', url)
@@ -207,36 +209,45 @@ def get_credential(config):
             logging.error('Reason: %s', resp.reason)
             return None
 
-        credential = resp.text
+        token = resp.text
         resp.close()
     except Exception as exception:
         logging.error(exception)
         logging.error('Error authenticating with %s', url)
         return None
 
-    if 'Password:' in credential:
-        logging.error('Authentication error, received login page.  Check username / password.  SB8200 has some kind of bug that can cause this after too many authentications, the only known fix is to reboot the modem.')
+    if 'Password:' in token:
+        logging.error('Authentication error, received login page.')
         return None
 
-    return credential
+    return { 'token': token, 'cookie': cookie }
 
 
 def get_html(config, credential):
     """ Get the status page from the modem
         return the raw html
     """
-    url = config['modem_url']
+
+    if config['modem_auth_required'] and config['modem_new_auth']:
+        url = config['modem_url'] + '?ct_' + credential['token']
+    else:
+        url = config['modem_url']
+
+    logging.debug('url: %s', url)
+
     verify_ssl = config['modem_verify_ssl']
 
-    if config['modem_auth_required']:
-        cookies = {'credential': credential}
+    if config['modem_auth_required'] and not config['modem_new_auth']:
+        cookies = { 'credential': credential['token'] }
+    elif config['modem_auth_required'] and config['modem_new_auth']:
+        cookies = { 'sessionId': credential['cookie'] }
     else:
         cookies = None
 
     logging.info('Retreiving stats from %s', url)
 
     try:
-        resp = requests.get(url, headers=HEADERS, cookies=cookies, verify=verify_ssl)
+        resp = requests.get(url, cookies=cookies, verify=verify_ssl)
         if resp.status_code != 200:
             logging.error('Error retreiving html from %s', url)
             logging.error('Status code: %s', resp.status_code)
@@ -250,7 +261,7 @@ def get_html(config, credential):
         return None
 
     if 'Password:' in status_html:
-        logging.error('Authentication error, received login page.  Check username / password.  SB8200 has some kind of bug that can cause this after too many authentications, the only known fix is to reboot the modem.')
+        logging.error('Authentication error, received login page.')
         if not config['modem_auth_required']:
             logging.warning('You have modem_auth_required to False, but a login page was detected!')
         return None
