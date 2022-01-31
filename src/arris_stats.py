@@ -53,10 +53,11 @@ def main():
             while not credential:
                 credential = get_credential(config)
                 if not credential and config['exit_on_auth_error']:
-                    error_exit('Unable to authenticate with modem.  Exiting since exit_on_auth_error is True', config)
+                    error_exit('Unable to authenticate with modem. Exiting since exit_on_auth_error is True', config)
                 if not credential:
                     logging.info('Unable to obtain valid login session, sleeping for: %ss', sleep_interval)
                     time.sleep(sleep_interval)
+                    continue
 
         # Get the HTML from the modem
         html = get_html(config, credential)
@@ -117,7 +118,7 @@ def get_config(config_path=None):
         'exit_on_auth_error': True,
         'exit_on_html_error': True,
         'clear_auth_token_on_html_error': True,
-        'sleep_before_exit': True,
+        'sleep_before_exit': False,
 
         # Influx
         'influx_url': 'http://localhost:8086',
@@ -244,7 +245,7 @@ def get_html(config, credential):
     else:
         cookies = None
 
-    logging.info('Retreiving stats from %s', url)
+    logging.info('Retreiving stats from %s', config['modem_url'])
 
     try:
         resp = requests.get(url, cookies=cookies, verify=verify_ssl)
