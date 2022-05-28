@@ -1,0 +1,22 @@
+name: Docker Image
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Docker Login
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build and Push Docker images
+      uses: docker/build-push-action@v3
+      with:
+        push: true
+        tags: ghcr.io/sarabveer/arris_cable_modem_stats:latest
