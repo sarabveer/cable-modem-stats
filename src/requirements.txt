@@ -1,13 +1,5 @@
-beautifulsoup4==4.10.0
+beautifulsoup4==4.12.2
 bs4==0.0.1
-certifi==2021.10.8
-chardet==4.0.0
-idna==2.10
-influxdb-client==1.25.0
-msgpack==1.0.3
-python-dateutil==2.8.2
-pytz==2021.3
-requests==2.27.1
-six==1.16.0
-soupsieve==2.3.1
-urllib3==1.26.8
+influxdb-client==1.36.1
+requests==2.31.0
+urllib3==2.0.3

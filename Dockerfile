@@ -1,8 +1,9 @@
 FROM python:3-alpine
 
-ADD src/ /src
-WORKDIR /src
+WORKDIR /usr/src/app
+ADD src .
+COPY config.sample.ini config.ini
 
 RUN pip install -r requirements.txt
 
-CMD ["python3","arris_stats.py","--config","config.ini"]
+CMD ["python3", ".", "--config","config.ini"]

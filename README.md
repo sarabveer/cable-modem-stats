@@ -5,17 +5,25 @@ This is a Python script to scrape stats from the Arris SB8200 cable modem web in
 Credit goes to:
 - https://github.com/andrewfraley/arris_cable_modem_stats
 - https://github.com/billimek/SB6183-stats-for-influxdb
-
+- https://github.com/t-mart/ispee
 
 ## Authentication
 
-### Oct. 2020
+## S33
+
+There are no special config options for this modem. Set `modem_password` in the config with your modem password.
+
+## SB8200
+
+If modem uses SSL, set `modem_ssl` to true.
+
+#### Oct. 2020
 
 In late Oct 2020, Comcast deployed firmware updates to the SB8200 which now require authenticating against the modem. If your modem requires authentication (you get a login page when browsing to https://192.168.100.1/), then you must edit your config.ini file (or set the matching ENV variables) and set `modem_auth_required` to `True`, and set `modem_password` appropriately. By default, your modem's password is the last eight characters of the serial number, located on a sticker on the bottom of the modem.
 
 There is some kind of bug (at least with Comcast's firmware) where the modem cannot handle more than ~10 sessions. Once those sessions have been used up, it seems you must wait for them to expire or reboot the modem. I have not been able to successfully log out of the sessions, but this script attempts to keep reusing the same session as long as it can.
 
-### Sept. 2021
+#### Sept. 2021
 
 In Sept 2021, Comcast deployed another firmware which changed the login flow. If you have firmware version `AB01.02.053.05_051921_193.0A.NSH` or higher, please set `modem_new_auth` to `True`.
 
@@ -33,10 +41,10 @@ Note that the same parameters from config.ini can be set as ENV variables, ENV o
 
 ## Run Locally
 
-- Install Python 3.8.x or later
+- Install the latest Python 3
 - Clone repo
 - Change directory
-  - `$ cd arris_cable_modem_stats/src`
+  - `$ cd arris_cable_modem_stats`
 
 - Install virtualenv
   - `$ python3 -m pip install virtualenv`
@@ -46,50 +54,36 @@ Note that the same parameters from config.ini can be set as ENV variables, ENV o
   - `$ source venv/bin/activate`
 
 - Install pip dependencies
-  - `python3 -m pip install -r requirements.txt`
+  - `python3 -m pip install -r src/requirements.txt`
 
 - Edit config.ini and set the approriate settings
 
 - If your cable modem requires authentication, edit config.ini and set:
-  - `modem_auth_required = True`
   - `modem_password = <your-password>`
+  - Check [Authentication](#authentication) for specific options for your modem model
 
 - Run arris_stats.py
-  - `python3 arris_stats.py --config config.ini`
+  - `python3 src --config config.ini`
 
-## Config Settings
+## Special Config Settings
+
 Config settings can be provided by the config.ini file, or set as ENV variables. ENV variables override config.ini. This is useful when running in a Docker container.
 
 | Option | Default | Notes |
 | ------------ | ------------ | ------------ |
-| `arris_stats_debug` | `False` | enables debug logs |
-| `destination` | influxdb | influxdb is the only valid option at this time |
-| `sleep_interval` | 120 | |
-| `modem_url` | https://192.168.100.1/cmconnectionstatus.html | |
-| `modem_verify_ssl` | `False` | |
-| `modem_auth_required` | `False` | |
-| `modem_new_auth` | `False` | |
-| `modem_username` | admin | |
-| `modem_password` | `None` | |
-| `modem_model` | sb8200 | only sb8200 is supported at this time |
+| `modem_model` | s33 | Pick either `s33` or `sb8200` |
 | `exit_on_auth_error` | `True` | Any auth error will cause an exit, useful when running in a Docker container to get a new session |
-| `exit_on_html_error` | `True` | Any error retrieving the html will cause an exit, mostly redundant with exit_on_auth_error |
+| `exit_on_html_error` | `True` | Any error retrieving tdata will cause an exit, mostly redundant with exit_on_auth_error |
 | `clear_auth_token_on_html_error` | `True` | This is useful if you don't want to exit, but do want to get a new session if/when getting the stats fails |
 | `sleep_before_exit` | `True` | If you want to sleep before exiting on errors, useful for Docker container when you have `restart = always` |
-| `influx_url` | http://localhost:8086 | |
-| `influx_bucket` | cable_modem_stats | |
-| `influx_org` | `None` | |
-| `influx_token` | `None` | |
-| `influx_verify_ssl` | `True` | |
 
 ### Debugging
 
 You can enable debug logs in three ways:
 
 1. Use --debug when running from cli
-  - `pipenv run python3 sb8200_stats.py --debug --config config.ini`
-2. Set ENV variable `arris_stats_debug = true`
-3. Set config.ini `arris_stats_debug = true`
+  - `pipenv run python3 src --debug --config config.ini`
+2. Set ENV variable `arris_stats_debug = true` or config.ini `arris_stats_debug = true`
 
 ## InfluxDB
 
