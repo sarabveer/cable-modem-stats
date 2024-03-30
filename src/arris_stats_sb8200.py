@@ -180,7 +180,7 @@ def parse_html(html):
     channel_id = table_row.find_all('td')[1].text.strip()
     channel_type = table_row.find_all('td')[3].text.replace(" Upstream", "").replace("OFDM", "OFDMA").strip()
     frequency = table_row.find_all('td')[4].text.replace(" Hz", "").strip()
-    width = table_row.find_all('td')[5].text.strip()
+    width = table_row.find_all('td')[5].text.replace(" Hz", "").strip()
     power = table_row.find_all('td')[6].text.replace(" dBmV", "").strip()
 
     stats['upstream'].append({
