@@ -12,7 +12,7 @@ import time
 import logging
 import argparse
 import configparser
-from datetime import datetime
+from datetime import datetime, UTC
 import urllib3
 
 def main():
@@ -188,7 +188,7 @@ def send_to_influx(stats, config):
   write_api = influx_client.write_api(write_options = SYNCHRONOUS)
 
   series = []
-  current_time = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+  current_time = datetime.now(UTC).strftime('%Y-%m-%dT%H:%M:%SZ')
 
   for stats_down in stats['downstream']:
     series.append(Point.from_dict({
