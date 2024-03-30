@@ -2,4 +2,4 @@ beautifulsoup4==4.12.3
 bs4==0.0.2
 influxdb-client==1.41.0
 requests==2.31.0
-urllib3==2.2.1
+urllib3==1.26.18
