@@ -53,6 +53,7 @@ def get_credential(config):
       logging.error('Error requesting login with %s', url)
       logging.error('Status code: %s', resp.status_code)
       logging.error('Reason: %s', resp.reason)
+      resp.close()
       return None
 
     response_obj = resp.json()
@@ -90,12 +91,14 @@ def get_credential(config):
       logging.error('Error authenticating with %s', url)
       logging.error('Status code: %s', resp.status_code)
       logging.error('Reason: %s', resp.reason)
+      resp.close()
       return None
     
     login_result = resp.json()["LoginResponse"]["LoginResult"]
     if login_result != "OK":
       logging.error('Error authenticating with %s', url)
       logging.error(f"Reason: Got {login_result} login result (expecting OK)")
+      resp.close()
       return None
 
     resp.close()

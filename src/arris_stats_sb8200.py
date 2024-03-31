@@ -6,6 +6,7 @@
 import base64
 import logging
 import requests
+from bs4 import BeautifulSoup
 
 def get_credential(config):
   """ Get the cookie credential by sending the
@@ -52,6 +53,7 @@ def get_credential(config):
       logging.error('Error authenticating with %s', url)
       logging.error('Status code: %s', resp.status_code)
       logging.error('Reason: %s', resp.reason)
+      resp.close()
       return None
 
     token = resp.text
@@ -130,7 +132,6 @@ def parse_html(html):
   # After: <tr><th colspan=7><strong>Upstream Bonded Channels</strong></th>
   html = html.replace('Bonded Channels</strong></th></tr>', 'Bonded Channels</strong></th>', 2)
 
-  from bs4 import BeautifulSoup
   soup = BeautifulSoup(html, 'html.parser')
   stats = {}
 

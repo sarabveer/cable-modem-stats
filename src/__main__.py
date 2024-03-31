@@ -41,6 +41,11 @@ def main():
     get_credential = arris_stats_s33.get_credential
     get_data = arris_stats_s33.get_json
     parse_data = arris_stats_s33.parse_json
+  elif modem_model == 'xb8':
+    import comcast_xb8_stats
+    get_credential = comcast_xb8_stats.get_credential
+    get_data = comcast_xb8_stats.get_html
+    parse_data = comcast_xb8_stats.parse_html
   else:
     error_exit('Modem model %s not supported!  Aborting', sleep=False)
 
