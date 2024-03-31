@@ -63,7 +63,7 @@ def main():
       time.sleep(sleep_interval)
     first = False
 
-    if config['modem_auth_required'] or modem_model == 's33':
+    if config['modem_auth_required'] or modem_model == 's33' or modem_model == 'xb8':
       while not credential:
         credential = get_credential(config)
         if not credential and config['exit_on_auth_error']:
