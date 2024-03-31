@@ -1,19 +1,23 @@
-# arris_cable_modem_stats
+# Cable Modem Stats
 
-This is a Python script to scrape stats from the Arris SB8200 cable modem web interface. Results are meant to be sent to InfluxDB 2.x for use with Grafana, but other targets could be added.
+This is a Python script to scrape stats from the Arris SB8200, Arris S33, and Comcast XB8 cable modem web interface. Results are meant to be sent to InfluxDB 2.x for use with Grafana, but other targets could be added.
 
-Credit goes to:
+This project is based off of:
 - https://github.com/andrewfraley/arris_cable_modem_stats
 - https://github.com/billimek/SB6183-stats-for-influxdb
 - https://github.com/t-mart/ispee
 
-## Authentication
+## Basic Config Setup
 
-## S33
+### Comcast XB8
 
-There are no special config options for this modem. Set `modem_password` in the config with your modem password.
+Set `modem_model` to `xb8`. There are no special config options for this modem. Set `modem_password` in the config with your modem password.
 
-## SB8200
+### S33
+
+Set `modem_model` to `s33` (currently the default). There are no special config options for this modem. Set `modem_password` in the config with your modem password.
+
+### SB8200
 
 If modem uses SSL, set `modem_ssl` to true.
 
@@ -29,22 +33,30 @@ In Sept 2021, Comcast deployed another firmware which changed the login flow. If
 
 This version seems to fix the ~10 session limit from the Oct. 2020 fimware. The `sleep_interval` has been reduced from `300` to `120`.
 
-## Run in Docker
-Run in a Docker container with:
+## Docker
+Docker Compose file
 
 ```bash
-docker build -t arris_stats .
-docker run arris_stats
+version: '3'
+
+services:
+  arris_stats:
+    image: ghcr.io/sarabveer/arris_cable_modem_stats:latest
+    container_name: arris_stats
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - modem_password=PutPasswordHere
 ```
 
-Note that the same parameters from config.ini can be set as ENV variables, ENV overrides config.ini.
+Note that the same parameters from config.ini can be set as environment variables. The environment variables override anything set in config.ini.
 
 ## Run Locally
 
 - Install the latest Python 3
 - Clone repo
 - Change directory
-  - `$ cd arris_cable_modem_stats`
+  - `$ cd cable-modem-stats`
 
 - Install virtualenv
   - `$ python3 -m pip install virtualenv`
@@ -67,15 +79,25 @@ Note that the same parameters from config.ini can be set as ENV variables, ENV o
 
 ## Special Config Settings
 
-Config settings can be provided by the config.ini file, or set as ENV variables. ENV variables override config.ini. This is useful when running in a Docker container.
+Config settings can be provided by the config.ini file, or set as environment variables. Environment variables override config.ini. This is useful when running in a Docker container.
 
 | Option | Default | Notes |
 | ------------ | ------------ | ------------ |
-| `modem_model` | s33 | Pick either `s33` or `sb8200` |
+| `modem_model` | s33 | Pick either `s33`, `sb8200`, or `xb8` |
 | `exit_on_auth_error` | `True` | Any auth error will cause an exit, useful when running in a Docker container to get a new session |
 | `exit_on_html_error` | `True` | Any error retrieving tdata will cause an exit, mostly redundant with exit_on_auth_error |
 | `clear_auth_token_on_html_error` | `True` | This is useful if you don't want to exit, but do want to get a new session if/when getting the stats fails |
 | `sleep_before_exit` | `True` | If you want to sleep before exiting on errors, useful for Docker container when you have `restart = always` |
+
+### InfluxDB Config
+
+| Option              | Default                 | Notes                                       |
+|---------------------|-------------------------|---------------------------------------------|
+| `influx_url`        | `http://localhost:8086` | InfluxDB URL                                |
+| `influx_bucket`     | `cable_modem_stats`     | DBRP Name                           |
+| `influx_org`        |                         | Org ID                                      |
+| `influx_token`      |                         | Token                                       |
+| `influx_verify_ssl` | `True`                  | Verify SSL cert when connecting to InfluxDB |
 
 ### Debugging
 
@@ -83,7 +105,7 @@ You can enable debug logs in three ways:
 
 1. Use --debug when running from cli
   - `pipenv run python3 src --debug --config config.ini`
-2. Set ENV variable `arris_stats_debug = true` or config.ini `arris_stats_debug = true`
+2. Set ENV variable `arris_stats_debug = true` or config.ini `enable_debug = true`
 
 ## InfluxDB
 
