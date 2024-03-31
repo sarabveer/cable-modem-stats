@@ -23,8 +23,8 @@ def main():
   config_path = args.config
   config = get_config(config_path)
 
-  # Re-init the logger if we set arris_stats_debug in ENV or config.ini
-  if config['arris_stats_debug']:
+  # Re-init the logger if we set enable_debug in ENV or config.ini
+  if config['enable_debug']:
     init_logger(True)
 
   sleep_interval = int(config['sleep_interval'])
@@ -115,9 +115,9 @@ def get_config(config_path=None):
 
   default_config = {
     # Main
-    'arris_stats_debug': False,
+    'enable_debug': False,
     'destination': 'influxdb',
-    'sleep_interval': 300,
+    'sleep_interval': 120,
     'modem_ip': '192.168.100.1',
     'modem_verify_ssl': False,
     'modem_username': 'admin',
@@ -126,7 +126,7 @@ def get_config(config_path=None):
     'exit_on_auth_error': True,
     'exit_on_html_error': True,
     'clear_auth_token_on_html_error': True,
-    'sleep_before_exit': False,
+    'sleep_before_exit': True,
 
     # SB8200 Only
     'modem_ssl': False,
