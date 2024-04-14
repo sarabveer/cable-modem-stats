@@ -24,7 +24,12 @@ def get_credential(config):
   }
 
   try:
-    resp = requests.post(url, data=data, allow_redirects=False)
+    resp = requests.post(
+      url,
+      data=data,
+      allow_redirects=False,
+      timeout=config['request_timeout']
+    )
     cookies = resp.cookies
 
     if resp.status_code != 302:
@@ -52,7 +57,7 @@ def get_html(config, cookies):
   logging.info('Retreiving stats from %s', url)
 
   try:
-    resp = requests.get(url, cookies=cookies)
+    resp = requests.get(url, cookies=cookies, timeout=config['request_timeout'])
     if resp.status_code != 200:
       logging.error('Error retreiving html from %s', url)
       logging.error('Status code: %s', resp.status_code)

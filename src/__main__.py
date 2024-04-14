@@ -127,6 +127,7 @@ def get_config(config_path=None):
     'exit_on_html_error': True,
     'clear_auth_token_on_html_error': True,
     'sleep_before_exit': True,
+    'request_timeout': 30,
 
     # SB8200 Only
     'modem_ssl': False,

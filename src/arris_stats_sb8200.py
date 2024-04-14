@@ -42,11 +42,21 @@ def get_credential(config):
   # have to send as a cookie with subsequent requests
   try:
     if config['modem_new_auth']:
-      resp = requests.get(auth_url, headers={'Authorization': 'Basic ' + auth_hash}, verify=verify_ssl)
+      resp = requests.get(
+        auth_url,
+        headers={'Authorization': 'Basic ' + auth_hash},
+        verify=verify_ssl,
+        timeout=config['request_timeout']
+      )
       cookie = resp.cookies['sessionId']
       logging.debug('cookie: %s', cookie)
     else:
-      resp = requests.get(auth_url, auth=(username, password), verify=verify_ssl)
+      resp = requests.get(
+        auth_url,
+        auth=(username, password),
+        verify=verify_ssl,
+        timeout=config['request_timeout']
+      )
       cookie = None
 
     if resp.status_code != 200:
@@ -99,7 +109,12 @@ def get_html(config, credential):
   logging.info('Retreiving stats from %s', init_url)
 
   try:
-    resp = requests.get(url, cookies=cookies, verify=verify_ssl)
+    resp = requests.get(
+      url,
+      cookies=cookies,
+      verify=verify_ssl,
+      timeout=config['request_timeout']
+    )
     if resp.status_code != 200:
       logging.error('Error retreiving html from %s', url)
       logging.error('Status code: %s', resp.status_code)

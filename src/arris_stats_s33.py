@@ -46,7 +46,8 @@ def get_credential(config):
       url=url,
       json=payload,
       headers=headers,
-      verify=verify_ssl
+      verify=verify_ssl,
+      timeout=config['request_timeout']
     )
 
     if resp.status_code != 200:
@@ -84,7 +85,8 @@ def get_credential(config):
       url=url,
       json=payload,
       headers=headers,
-      verify=verify_ssl
+      verify=verify_ssl,
+      timeout=config['request_timeout']
     )
 
     if resp.status_code != 200:
@@ -144,7 +146,8 @@ def get_json(config, credential):
       url=url,
       json=payload,
       headers=headers,
-      verify=verify_ssl
+      verify=verify_ssl,
+      timeout=config['request_timeout']
     )
     if resp.status_code != 200:
       logging.error('Error retreiving json from %s', url)

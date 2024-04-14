@@ -88,6 +88,7 @@ Config settings can be provided by the config.ini file, or set as environment va
 | `exit_on_html_error` | `True` | Any error retrieving tdata will cause an exit, mostly redundant with exit_on_auth_error |
 | `clear_auth_token_on_html_error` | `True` | This is useful if you don't want to exit, but do want to get a new session if/when getting the stats fails |
 | `sleep_before_exit` | `True` | If you want to sleep before exiting on errors, useful for Docker container when you have `restart = always` |
+| `request_timeout` | `30` | Seconds to wait before request to fetch modem webpage/data times out |
 
 ### InfluxDB Config
 
