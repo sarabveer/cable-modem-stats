@@ -119,6 +119,7 @@ def parse_html(html):
      # NOTE: Indexing by channel_id is important as this table might be ordered
      #       differently than the "Channel Bonding" table parsed above.
      channel = stats['downstream'][channel_id]
+     channel['unerrored'] = codeword_rows[1].find_all("td")[i].text.strip()
      channel['corrected'] = codeword_rows[2].find_all("td")[i].text.strip()
      channel['uncorrectables'] = codeword_rows[3].find_all("td")[i].text.strip()
 
