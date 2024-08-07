@@ -83,13 +83,13 @@ def parse_html(html):
 
   # downstream table
   downstream_rows = soup.find_all("table")[0].find('tbody').find_all("tr")
-  cm_error_rows = soup.find_all("table")[2].find('tbody').find_all("tr")
   # Get count of downstream columns
   downstream_channels = len(downstream_rows[0].find_all("td"))
-  stats['downstream'] = []
+  stats['downstream'] = {}
   for i in range(downstream_channels):
+    channel_id = downstream_rows[0].find_all("td")[i].text.strip()
     channel = {
-      'channel_id': downstream_rows[0].find_all("td")[i].text.strip(),
+      'channel_id': channel_id,
       'snr': downstream_rows[3].find_all("td")[i].text.replace(" dB", "").strip(),
       'power': downstream_rows[4].find_all("td")[i].text.replace(" dBmV", "").strip(),
     }
@@ -107,17 +107,27 @@ def parse_html(html):
     else:
       channel['frequency'] = frequency
 
-    if channel['channel_id'] == cm_error_rows[0].find_all("td")[i].text.strip():
-      channel['corrected'] = cm_error_rows[2].find_all("td")[i].text.strip()
-      channel['uncorrectables'] = cm_error_rows[3].find_all("td")[i].text.strip()
+    stats['downstream'][channel_id] = channel
 
-    stats['downstream'].append(channel)
-
-  logging.debug('downstream stats: %s', stats['downstream'])
   if not stats['downstream']:
     logging.error('Failed to get any downstream stats! Probably a parsing issue in parse_html()')
 
-  # upstream table
+  # Parse Downstream Codeword stats table
+  codeword_rows = soup.find_all("table")[2].find('tbody').find_all("tr")
+  for i, element in enumerate(codeword_rows[0].find_all("td")):
+     channel_id = element.text.strip()
+     # NOTE: Indexing by channel_id is important as this table might be ordered
+     #       differently than the "Channel Bonding" table parsed above.
+     channel = stats['downstream'][channel_id]
+     channel['corrected'] = codeword_rows[2].find_all("td")[i].text.strip()
+     channel['uncorrectables'] = codeword_rows[3].find_all("td")[i].text.strip()
+
+  logging.debug('downstream stats: %s', stats['downstream'])
+
+  # Convert downstream dictionary format to expected array format
+  stats['downstream'] = stats['downstream'].values()
+
+  # Upstream table
   upstream_rows = soup.find_all("table")[1].find('tbody').find_all("tr")
   # Get count of upstream columns
   upstream_channels = len(upstream_rows[0].find_all("td"))
