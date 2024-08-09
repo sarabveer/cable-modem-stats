@@ -233,11 +233,10 @@ def send_to_influx(stats, config):
       }
     }))
 
-  try:   
+  try:
     write_api.write(bucket = config['influx_bucket'], record = series)
   except Exception:
-    logging.error(Exception)
-    logging.error('Failed To Write To InfluxDB')
+    logging.exception('Failed To Write To InfluxDB')
     return
 
   logging.info('Successfully wrote data to InfluxDB')
