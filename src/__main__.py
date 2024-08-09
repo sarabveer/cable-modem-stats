@@ -197,7 +197,7 @@ def send_to_influx(stats, config):
   current_time = datetime.now(UTC).strftime('%Y-%m-%dT%H:%M:%SZ')
 
   for stats_down in stats['downstream']:
-    series.append(Point.from_dict({
+    data = {
       'measurement': 'downstream_statistics',
       'time': current_time,
       'fields': {
@@ -211,7 +211,12 @@ def send_to_influx(stats, config):
         'channel_id': int(stats_down['channel_id']),
         'modulation': stats_down['modulation']
       }
-    }))
+    }
+    ## Only some modems, like the XB8, has the 'unerrored' value
+    if 'unerrored' in stats_down:
+      data['fields']['unerrored'] = int(stats_down['unerrored'])
+
+    series.append(Point.from_dict(data))
 
   for stats_up in stats['upstream']:
     series.append(Point.from_dict({
