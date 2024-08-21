@@ -201,7 +201,7 @@ def send_to_influx(stats, config):
       'measurement': 'downstream_statistics',
       'time': current_time,
       'fields': {
-        'frequency': int(stats_down['frequency']),
+        'frequency': int(float(stats_down['frequency'])),
         'power': float(stats_down['power']),
         'snr': float(stats_down['snr']),
         'corrected': int(stats_down['corrected']),
@@ -223,7 +223,7 @@ def send_to_influx(stats, config):
       'measurement': 'upstream_statistics',
       'time': current_time,
       'fields': {
-        'frequency': int(stats_up['frequency']),
+        'frequency': int(float(stats_up['frequency'])),
         'power': float(stats_up['power']),
         'width': int(stats_up['width']),
       },
