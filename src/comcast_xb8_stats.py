@@ -100,6 +100,8 @@ def parse_html(html):
       channel['modulation'] = "OFDM PLC"
     elif modulation == "256 QAM":
       channel['modulation'] = "QAM256"
+    else:
+      channel['modulation'] = modulation
 
     frequency = downstream_rows[2].find_all("td")[i].text.strip()
     if "MHz" in frequency:
