@@ -1,9 +1,21 @@
-FROM python:3-alpine
+FROM ghcr.io/astral-sh/uv:python3.14-alpine AS builder
 
 WORKDIR /usr/src/app
-ADD src .
+
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
+
+COPY pyproject.toml uv.lock ./
+RUN uv sync --locked --no-dev
+
+FROM python:3.14-alpine AS runtime
+
+WORKDIR /usr/src/app
+
+COPY --from=builder /usr/src/app/.venv .venv
+COPY src ./src
 COPY config.sample.ini config.ini
 
-RUN pip install -r requirements.txt
+ENV PATH="/usr/src/app/.venv/bin:$PATH"
 
-CMD ["python3", ".", "--config","config.ini"]
+CMD ["python", "src", "--config", "config.ini"]
