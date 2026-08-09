@@ -32,7 +32,7 @@ There is some kind of bug (at least with Comcast's firmware) where the modem can
 
 In Sept 2021, Comcast deployed another firmware which changed the login flow. If you have firmware version `AB01.02.053.05_051921_193.0A.NSH` or higher, please set `modem_new_auth` to `True`.
 
-This version seems to fix the ~10 session limit from the Oct. 2020 fimware. The `sleep_interval` has been reduced from `300` to `120`.
+This version seems to fix the ~10 session limit from the Oct. 2020 firmware. The `sleep_interval` has been reduced from `300` to `120`.
 
 ## Docker
 
@@ -64,7 +64,7 @@ Note that the same parameters from config.ini can be set as environment variable
 - Create the virtual environment and install locked dependencies
   - `uv sync --locked`
 
-- Edit config.ini and set the approriate settings
+- Edit config.ini and set the appropriate settings
 
 - If your cable modem requires authentication, edit config.ini and set:
   - `modem_password = <your-password>`
