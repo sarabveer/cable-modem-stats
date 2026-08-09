@@ -1,7 +1,6 @@
 """
 Pull stats from Arris SB8200
 """
-# pylint: disable=line-too-long
 
 import base64
 import logging
