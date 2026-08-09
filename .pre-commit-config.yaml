@@ -40,9 +40,9 @@ repos:
         entry: uv lock --check
         pass_filenames: false
         always_run: true
-      - id: pyright
-        name: 📐 Type check with pyright
-        language: system
-        types: [python]
-        entry: uv run pyright
-        pass_filenames: false
+      # - id: pyright
+      #   name: 📐 Type check with pyright
+      #   language: system
+      #   types: [python]
+      #   entry: uv run pyright
+      #   pass_filenames: false

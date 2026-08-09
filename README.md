@@ -39,10 +39,8 @@ This version seems to fix the ~10 session limit from the Oct. 2020 firmware. The
 Docker Compose file
 
 ```bash
-version: '3'
-
 services:
-  arris_stats:
+  cable-modem-stats:
     image: ghcr.io/sarabveer/cable-modem-stats:latest
     container_name: arris_stats
     restart: unless-stopped
@@ -72,6 +70,46 @@ Note that the same parameters from config.ini can be set as environment variable
 
 - Run arris_stats.py
   - `uv run python src --config config.ini`
+
+## Setting up development environment
+
+This Python project is managed using [uv][uv], with project metadata defined in `pyproject.toml`.
+
+You need at least:
+
+- Python 3.11+
+- [uv][uv-install]
+
+To install all packages, including all development requirements:
+
+```bash
+uv sync --locked
+```
+
+Then install the Git hook once for this clone:
+
+```bash
+uv run pre-commit install --install-hooks
+```
+
+As this repository uses the [pre-commit][pre-commit] framework, all changes are checked with each commit. You can run all checks manually using:
+
+```bash
+uv run pre-commit run --all-files
+```
+
+To run Ruff directly without applying fixes:
+
+```bash
+uv run ruff check .
+uv run ruff format --check .
+```
+
+To run Pyright directly:
+
+```bash
+uv run pyright
+```
 
 ## Special Config Settings
 
@@ -130,10 +168,14 @@ The `Authorization` header has to be in format: `Token <your-token-here>`
 
 Read more about this [here](https://github.com/grafana/grafana/issues/29372#issuecomment-733717988).
 
-### Arris SB8200 Dashboard
+### Grafana Dashboard
 
-- Setup arrris_stats.py to run from somewhere
+- Set up this script
 - Import a new dashboard using the [grafana/sb8200_grafana.json](grafana/sb8200_grafana.json) file. Originally exported from Grafana v8.0.5
 
-![SB8200 Dashboard 1](readme/dash1.png)
-![SB8200 Dashboard 2](readme/dash2.png)
+![Dashboard 1](readme/dash1.png)
+![Dashboard 2](readme/dash2.png)
+
+[pre-commit]: https://pre-commit.com/
+[uv]: https://docs.astral.sh/uv/
+[uv-install]: https://docs.astral.sh/uv/getting-started/installation/
