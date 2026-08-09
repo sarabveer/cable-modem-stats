@@ -1,0 +1,8 @@
+.git
+.github
+__pycache__/
+*.py[codz]
+*$py.class
+.venv
+venv/
+config.ini

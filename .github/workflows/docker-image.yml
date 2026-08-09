@@ -19,4 +19,4 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: ghcr.io/sarabveer/arris_cable_modem_stats:latest
+        tags: ghcr.io/sarabveer/cable-modem-stats:latest

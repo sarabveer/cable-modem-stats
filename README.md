@@ -3,13 +3,14 @@
 This is a Python script to scrape stats from the Arris SB8200, Arris S33, and Comcast XB8 cable modem web interface. Results are meant to be sent to InfluxDB 2.x for use with Grafana, but other targets could be added.
 
 This project is based off of:
+
 - https://github.com/andrewfraley/arris_cable_modem_stats
 - https://github.com/billimek/SB6183-stats-for-influxdb
 - https://github.com/t-mart/ispee
 
 ## Basic Config Setup
 
-### Comcast XB8
+### Comcast XB8 / XB6
 
 Set `modem_model` to `xb8`. There are no special config options for this modem. Set `modem_password` in the config with your modem password.
 
@@ -34,6 +35,7 @@ In Sept 2021, Comcast deployed another firmware which changed the login flow. If
 This version seems to fix the ~10 session limit from the Oct. 2020 fimware. The `sleep_interval` has been reduced from `300` to `120`.
 
 ## Docker
+
 Docker Compose file
 
 ```bash
@@ -41,7 +43,7 @@ version: '3'
 
 services:
   arris_stats:
-    image: ghcr.io/sarabveer/arris_cable_modem_stats:latest
+    image: ghcr.io/sarabveer/cable-modem-stats:latest
     container_name: arris_stats
     restart: unless-stopped
     network_mode: host
@@ -53,29 +55,23 @@ Note that the same parameters from config.ini can be set as environment variable
 
 ## Run Locally
 
-- Install the latest Python 3
+- Install Python 3.11 or newer
+- [Install uv](https://docs.astral.sh/uv/getting-started/installation/)
 - Clone repo
 - Change directory
-  - `$ cd cable-modem-stats`
+  - `cd cable-modem-stats`
 
-- Install virtualenv
-  - `$ python3 -m pip install virtualenv`
-
-- Create and activate virtualenv
-  - `$ python3 -m venv venv`
-  - `$ source venv/bin/activate`
-
-- Install pip dependencies
-  - `python3 -m pip install -r src/requirements.txt`
+- Create the virtual environment and install locked dependencies
+  - `uv sync --locked`
 
 - Edit config.ini and set the approriate settings
 
 - If your cable modem requires authentication, edit config.ini and set:
   - `modem_password = <your-password>`
-  - Check [Authentication](#authentication) for specific options for your modem model
+  - Check [Basic Config Setup](#basic-config-setup) for specific options for your modem model
 
 - Run arris_stats.py
-  - `python3 src --config config.ini`
+  - `uv run python src --config config.ini`
 
 ## Special Config Settings
 
@@ -95,7 +91,7 @@ Config settings can be provided by the config.ini file, or set as environment va
 | Option              | Default                 | Notes                                       |
 |---------------------|-------------------------|---------------------------------------------|
 | `influx_url`        | `http://localhost:8086` | InfluxDB URL                                |
-| `influx_bucket`     | `cable_modem_stats`     | DBRP Name                           |
+| `influx_bucket`     | `cable_modem_stats`     | DBRP Name                                   |
 | `influx_org`        |                         | Org ID                                      |
 | `influx_token`      |                         | Token                                       |
 | `influx_verify_ssl` | `True`                  | Verify SSL cert when connecting to InfluxDB |
@@ -105,7 +101,7 @@ Config settings can be provided by the config.ini file, or set as environment va
 You can enable debug logs in three ways:
 
 1. Use --debug when running from cli
-  - `pipenv run python3 src --debug --config config.ini`
+  - `uv run python src --debug --config config.ini`
 2. Set ENV variable `arris_stats_debug = true` or config.ini `enable_debug = true`
 
 ## InfluxDB
