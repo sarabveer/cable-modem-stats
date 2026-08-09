@@ -6,11 +6,45 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "beautifulsoup4==4.12.3",
-    "bs4==0.0.2",
     "influxdb-client==1.41.0",
     "requests==2.31.0",
     "urllib3==1.26.18",
 ]
 
+[dependency-groups]
+dev = [
+    "codespell>=2.1,<3",
+    "pre-commit>=4.0,<5",
+    "pyright>=1.1,<2",
+    "ruff>=0.15,<1",
+]
+
 [tool.uv]
+default-groups = ["dev"]
 package = false
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+select = [
+    "B",
+    "C4",
+    "E",
+    "F",
+    "I",
+    "RUF",
+    "S",
+    "SIM",
+    "T10",
+    "UP",
+]
+
+[tool.pyright]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"
+include = ["src"]
+exclude = [".venv"]
+reportMissingTypeStubs = false
