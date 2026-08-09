@@ -1,10 +1,6 @@
 """
-Pull stats from Arris Cable modem's web interface
-Send stats to InfluxDB
-
-https://github.com/andrewfraley/arris_cable_modem_stats
+Pull stats from Cable modem web interface and send stats to InfluxDB
 """
-# pylint: disable=line-too-long
 
 import argparse
 import configparser

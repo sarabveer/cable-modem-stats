@@ -1,7 +1,6 @@
 """
 Pull stats from Comcast XB8
 """
-# pylint: disable=line-too-long
 
 import logging
 
@@ -118,6 +117,18 @@ def parse_html(html):
         channel["unerrored"] = codeword_rows[1].find_all("td")[i].text.strip()
         channel["corrected"] = codeword_rows[2].find_all("td")[i].text.strip()
         channel["uncorrectables"] = codeword_rows[3].find_all("td")[i].text.strip()
+
+    ofdm_corrected = {
+        channel["corrected"] for channel in stats["downstream"].values() if channel["modulation"] == "OFDM PLC"
+    }
+    for channel in stats["downstream"].values():
+        if channel["modulation"] == "QAM256" and channel["corrected"] in ofdm_corrected:
+            logging.debug(
+                "Ignoring QAM256 corrected count duplicated from an OFDM channel: channel %s, corrected %s",
+                channel["channel_id"],
+                channel["corrected"],
+            )
+            channel["corrected"] = "0"
 
     logging.debug("downstream stats: %s", stats["downstream"])
 
