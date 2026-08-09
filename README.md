@@ -42,9 +42,8 @@ Docker Compose file
 services:
   cable-modem-stats:
     image: ghcr.io/sarabveer/cable-modem-stats:latest
-    container_name: arris_stats
+    container_name: cable-modem-stats
     restart: unless-stopped
-    network_mode: host
     environment:
       - modem_password=PutPasswordHere
 ```
